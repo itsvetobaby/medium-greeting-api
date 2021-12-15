@@ -4,11 +4,11 @@ app = Flask(__name__)
 
 @app.route('/getmsg/', methods=['GET'])
 def respond():
-    # Retrieve the name from the url parameter /getmsg/?    name=
+    # Retrieve the name from the url parameter /getmsg/?name=
     name = request.args.get("name", None)
 
     # For debugging
-    print(f"got name {name}")
+    print(f"Received: {name}")
 
     response = {}
 
