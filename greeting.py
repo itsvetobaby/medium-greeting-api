@@ -5,11 +5,32 @@ myclient = pymongo.MongoClient("mongodb+srv://littytitties:litastits11@cluster0.
 mydb = myclient["Cluster0"]
 mycol = mydb["user"]
 
+def distillery(email):
+    myquery = { "email": email }
+    x = mycol.find_one(myquery)
+    dump = x["predictionDump"]
+    carrier = {}
+    keys = list(dump.keys())
+    for i in range(0, len(keys)):
+        first = dump[keys[i]]
+        goodsBundle = first['goods']
+        transactionAppID = first['aId']
+        for j in range(0, len(goodsBundle)):
+            firstGood = goodsBundle[j]
+            goodOfInterest = firstGood['aId']
+            # if no array named goodOfInterest, create one
+            if goodOfInterest not in carrier:
+                carrier[goodOfInterest] = []
+            carrier[goodOfInterest].append(transactionAppID)
+    print(carrier, "carrier")
+
+
 def returnData(email):
     print("1234", email)
-    myquery = { "email": "allinto@icloud.com" }
+    myquery = { "email": email }
     x = mycol.find_one(myquery)
     print(x['_id'])
+    
     return str(x['_id'])
 
 
@@ -30,6 +51,7 @@ def respond():
     elif str(name).isdigit():
         response["ERROR"] = "The name can't be numeric. Please send a string."
     else:
+        distillery(name)
         x = returnData(name)
         response["MESSAGE"] = f"Welcome {name} {x} to our awesome API!"
 
@@ -62,4 +84,4 @@ def index():
 
 if __name__ == '__main__':
     # Threaded option to enable multiple instances for multiple user access support
-    app.run()
+    app.run(debug=True)
