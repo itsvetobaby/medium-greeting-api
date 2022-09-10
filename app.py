@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
 app = Flask(__name__)
-
+import pymongo
+myclient = pymongo.MongoClient("mongodb+srv://littytitties:litastits11@cluster0.7yrcb.mongodb.net/Cluster0?retryWrites=true&w=majority")
+mydb = myclient["Cluster0"]
 
 @app.route('/getmsg/', methods=['GET'])
 def respond():
@@ -19,7 +21,11 @@ def respond():
     elif str(name).isdigit():
         response["ERROR"] = "The name can't be numeric. Please send a string."
     else:
-        response["MESSAGE"] = f"Welcome {name} to our awesome API!"
+        mycol = mydb["user"]
+        myquery = { "email": "allinto@Icloud.com" }
+        x = mycol.find_one(myquery)
+        x = x['email']
+        response["MESSAGE"] = f"Welcome {x} to our awesome API!"
 
     # Return the response in json format
     return jsonify(response)
