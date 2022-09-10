@@ -1,53 +1,39 @@
-from flask import Flask, request, jsonify
+from flask import Flask, render_template, redirect, jsonify
+import pymongo
+import os
+import sys
+import pymongo
+myclient = pymongo.MongoClient("mongodb+srv://littytitties:litastits11@cluster0.7yrcb.mongodb.net/Cluster0?retryWrites=true&w=majority")
+mydb = myclient["Cluster0"]
+mycol = mydb["user"]
+
 app = Flask(__name__)
 
 
-@app.route('/getmsg/', methods=['GET'])
-def respond():
-    # Retrieve the name from the url parameter /getmsg/?name=
-    name = request.args.get("name", None)
-
-    # For debugging
-    print(f"Received: {name}")
-
+@app.route('/')
+def index():
     response = {}
-
-    # Check if the user sent a name at all
-    if not name:
-        response["ERROR"] = "No name found. Please send a name."
-    # Check if the user entered a number
-    elif str(name).isdigit():
-        response["ERROR"] = "The name can't be numeric. Please send a string."
-    else:
-        response["MESSAGE"] = f"Welcome {name} to our awesome API!"
+    myquery = { "email": "allinto@icloud.com" }
+    x = mycol.find_one(myquery)
+    x = (x['_id'])
+    response["MESSAGE"] = f"Welcome {x} to our awesome API!"
 
     # Return the response in json format
     return jsonify(response)
 
 
-@app.route('/post/', methods=['POST'])
-def post_something():
-    param = request.form.get('name')
-    print(param)
-    # You can add the test cases you made in the previous function, but in our case here you are just testing the POST functionality
-    if param:
-        return jsonify({
-            "Message": f"Welcome {name} to our awesome API!",
-            # Add this option to distinct the POST request
-            "METHOD": "POST"
-        })
-    else:
-        return jsonify({
-            "ERROR": "No name found. Please send a name."
-        })
+# @app.route('/api/notes/mongo')
+# def note_mongo():
+#     notes = mongo.db.tasks.find()
+#     data = []
 
+#     for note in notes:
+#         data.append({
+#             '_id': str(note['_id']),
+#             'content': note['content']
+#         })
 
-@app.route('/')
-def index():
-    # A welcome message to test our server
-    return "<h1>Welcome to our medium-greeting-api!</h1>"
+#     return jsonify(data)
 
-
-if __name__ == '__main__':
-    # Threaded option to enable multiple instances for multiple user access support
-    app.run(threaded=True, port=5000)
+if __name__=="__main__":
+    app.run(threaded=True, debug=True, port=5001)
