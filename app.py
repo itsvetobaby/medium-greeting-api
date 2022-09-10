@@ -17,18 +17,19 @@ def index():
     return jsonify(response)
 
 
-# @app.route('/api/notes/mongo')
-# def note_mongo():
-#     notes = mongo.db.tasks.find()
-#     data = []
-
-#     for note in notes:
-#         data.append({
-#             '_id': str(note['_id']),
-#             'content': note['content']
-#         })
-
-#     return jsonify(data)
+@app.route('/getmsg/', methods=['GET'])
+def respond():
+    # Retrieve the name from the url parameter /getmsg/?name=
+    name = request.args.get("name", None)
+    print(f"Received: {name}")
+    response = {}
+    if not name:
+        response["ERROR"] = "No name found. Please send a name."
+    elif str(name).isdigit():
+        response["ERROR"] = "The name can't be numeric. Please send a string."
+    else:
+        response["MESSAGE"] = f"Welcome {name} to our awesome API!"
+    return jsonify(response)
 
 if __name__=="__main__":
     app.run(threaded=True, debug=True, port=5001)
