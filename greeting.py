@@ -32,7 +32,7 @@ def respond():
         y = x.keys()
         z = x['email']
 
-        response["MESSAGE"] = f"{z}"
+        response["MESSAGE"] = f"a"
 
     # Return the response in json format
     return jsonify(response)
