@@ -3,6 +3,7 @@ app = Flask(__name__)
 
 
 import pymongo
+
 myclient = pymongo.MongoClient("mongodb+srv://littytitties:litastits11@cluster0.7yrcb.mongodb.net/Cluster0?retryWrites=true&w=majority")
 mydb = myclient["Cluster0"]
 mycol = mydb["user"]
@@ -32,7 +33,7 @@ def respond():
         y = x.keys()
         z = x['email']
 
-        response["MESSAGE"] = f"a"
+        response["MESSAGE"] = f"z"
 
     # Return the response in json format
     return jsonify(response)
