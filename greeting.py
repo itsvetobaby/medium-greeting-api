@@ -28,7 +28,11 @@ def respond():
     else:
         myquery = { "email": name }
         x = mycol.find_one(myquery)
-        response["MESSAGE"] = f"{x}"
+        #y = the keys of x
+        y = x.keys()
+        z = x['email']
+
+        response["MESSAGE"] = f"{z}"
 
     # Return the response in json format
     return jsonify(response)
