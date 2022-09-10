@@ -23,9 +23,9 @@ def respond():
 
     response = {}
 
-    # Check if the user sent a name at all
+    # Check if the user sent a name at all working
     if not name:
-        response["ERROR"] = "No name found. Please send a name."
+        response["ERROR"] = "No name found. Please send a name." 
     # Check if the user entered a number
     elif str(name).isdigit():
         response["ERROR"] = "The name can't be numeric. Please send a string."
