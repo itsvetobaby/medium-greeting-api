@@ -11,3 +11,4 @@ zipp==3.6.0
 pymongo
 flask_mongoengine
 pandas
+prophet
