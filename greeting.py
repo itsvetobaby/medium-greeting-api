@@ -1,13 +1,18 @@
 from flask import Flask, request, jsonify
 app = Flask(__name__)
 import pymongo
+import datetime
+import pandas as pd 
+from prophet import Prophet
+
 myclient = pymongo.MongoClient("mongodb+srv://littytitties:litastits11@cluster0.7yrcb.mongodb.net/Cluster0?retryWrites=true&w=majority")
 mydb = myclient["Cluster0"]
-mycol = mydb["user"]
+userCol = mydb["user"]
+aIdCol = mydb["aId"]
 
 def distillery(email):
     myquery = { "email": email }
-    x = mycol.find_one(myquery)
+    x = userCol.find_one(myquery)
     dump = x["predictionDump"]
     carrier = {}
     keys = list(dump.keys())
@@ -23,13 +28,98 @@ def distillery(email):
                 carrier[goodOfInterest] = []
             carrier[goodOfInterest].append(transactionAppID)
     print(carrier, "carrier")
+    return carrier
+
+def midnight(data):
+    #each key in data is the good, the values are instances of transactions they occur in
+    # get keys
+    carrier = {}
+
+    keys = list(data.keys())
+    # for each key, get the values
+    for i in range(0, len(keys)):
+        print(keys[i], "key")
+        # get the values
+        values = data[keys[i]]
+        # for each value, get the appID
+        for j in range(0, len(values)):
+            print(values[j], "value")
+            myquery = { "aId": values[j] }
+            x = aIdCol.find_one(myquery)
+            epoch1 = x["time"]
+            print(epoch1, "epoch123")
+            #BROKEN
+            dateIs = (datetime.datetime.fromtimestamp(float(epoch1)/1000).strftime('%Y-%m-%d'))
+
+            
+            #convert epoch to date
+
+
+
+            ammount = 0
+            getToGoods = x["goods"]
+            for k in range(0, len(getToGoods)):
+                if getToGoods[k]["aId"] == keys[i]:
+                    ammount = getToGoods[k]["requested"]
+            goodOfInterest = keys[i]
+            if goodOfInterest not in carrier:
+                carrier[goodOfInterest] = []
+            carrier[goodOfInterest].append([dateIs, ammount])
+
+
+    return carrier
+
+def predict(data, email): 
+    print(data, "data")
+    keys = list(data.keys())
+    for i in range(0, len(keys)):
+        print(keys[i], [i], "key1234")
+        dataFrame = pd.DataFrame(data[keys[i]], columns = ['ds', 'y'])
+        #if two rows or less in dataFrame, return
+        if len(dataFrame) <= 2:
+            print("nah")
+        else:
+            print(dataFrame, "dataFrame")
+            model = Prophet()
+            model.fit(dataFrame)
+
+            future = model.make_future_dataframe(periods=2)
+            forecast = model.predict(future)
+            print(forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(), "forecast")
+            #check row 0 yhat value        
+            prediction = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail()
+            # convert to valid bson object
+            prediction = prediction.to_dict('records')
+            print(prediction, "prediction")
+            #create object with key of good and value of prediction
+
+
+            # myquery = { "email": email }
+
+            name = keys[i]
+            predictions = prediction
+            # place name and predictions in object
+            object = {name: predictions}
+            print(object, "object")
+
+
+            
+            # insert into mongodb under user
+            myquery = { "email": email }
+            userCol.update_one(myquery, {"$set": {"predcition": object}})
+
+
+
+
+
 
 
 def returnData(email):
     print("1234", email)
     myquery = { "email": email }
-    x = mycol.find_one(myquery)
+    x = userCol.find_one(myquery)
     print(x['_id'])
+    
     
     return str(x['_id'])
 
@@ -51,7 +141,9 @@ def respond():
     elif str(name).isdigit():
         response["ERROR"] = "The name can't be numeric. Please send a string."
     else:
-        distillery(name)
+        distilled = distillery(name)
+        midnighted = midnight(distilled)
+        predict(midnighted, name)
         x = returnData(name)
         response["MESSAGE"] = f"Welcome {name} {x} to our awesome API!"
 
